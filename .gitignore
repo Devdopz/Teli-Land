@@ -1,0 +1,28 @@
+# Build output
+bin/
+obj/
+dist/
+installer-smoke/
+
+# IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Logs and temp files
+*.log
+*.tmp
+*.cache
+
+# Generated installers and binaries
+*.pdb
+*.msi
+*.exe
+!build-installer.ps1
+
+# Keep source-only repository
+TeliLandOverlaySetup.exe
+TeliLandOverlay/bin/
+TeliLandOverlay/obj/
+
