@@ -12,7 +12,7 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         WindowStartupLocation="Manual"
-        ShowInTaskbar="False"
+        ShowInTaskbar="True"
         Topmost="True">
     <Window.Resources>
         <Style x:Key="SecondaryCircleButtonStyle" TargetType="Button">
