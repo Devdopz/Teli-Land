@@ -40,7 +40,7 @@ New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
 & $isccPath `
     "/DPublishDir=$publishDir" `
     "/DOutputDir=$outputDir" `
-    "/DMyAppVersion=1.0.0" `
+    "/DMyAppVersion=1.1.0" `
     $installerScript
 
 if ($LASTEXITCODE -ne 0) {

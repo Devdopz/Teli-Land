@@ -14,14 +14,71 @@
         WindowStartupLocation="Manual"
         ShowInTaskbar="False"
         Topmost="True">
+    <Window.Resources>
+        <Style x:Key="SecondaryCircleButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="44" />
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Background" Value="#F6F6F6" />
+            <Setter Property="BorderBrush" Value="#22000000" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="#111111" />
+            <Setter Property="FontFamily" Value="Bahnschrift SemiBold" />
+            <Setter Property="FontSize" Value="8.5" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="22">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="14"
+                                                  ShadowDepth="0"
+                                                  Opacity="0.18"
+                                                  Color="#000000" />
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Window.ContextMenu>
         <ContextMenu>
             <MenuItem Header="Exit Overlay" Click="ExitOverlay_OnClick" />
         </ContextMenu>
     </Window.ContextMenu>
 
-    <Grid Background="Transparent">
-        <Border Width="82"
+    <Grid>
+        <Popup x:Name="ActionMenuPopup"
+               AllowsTransparency="True"
+               PlacementTarget="{Binding ElementName=MainBadgeHost}"
+               Placement="Left"
+               StaysOpen="False"
+               PopupAnimation="Fade">
+            <Border Background="Transparent" Padding="8">
+                <StackPanel>
+                    <Button Style="{StaticResource SecondaryCircleButtonStyle}"
+                            Content="START"
+                            ToolTip="Start" />
+                    <Button Style="{StaticResource SecondaryCircleButtonStyle}"
+                            Content="TOOLS"
+                            ToolTip="Tools" />
+                    <Button Style="{StaticResource SecondaryCircleButtonStyle}"
+                            Content="MENU"
+                            Margin="0"
+                            ToolTip="Menu" />
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <Border x:Name="MainBadgeHost"
+                Width="82"
                 Height="82"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
@@ -30,8 +87,10 @@
                 BorderThickness="1"
                 CornerRadius="41"
                 Cursor="Hand"
-                MouseLeftButtonDown="Badge_OnMouseLeftButtonDown"
-                ToolTip="Drag to move. Right-click to exit.">
+                MouseLeftButtonDown="MainBadge_OnMouseLeftButtonDown"
+                MouseMove="MainBadge_OnMouseMove"
+                MouseLeftButtonUp="MainBadge_OnMouseLeftButtonUp"
+                ToolTip="Click to toggle menu. Drag to move. Right-click to exit.">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="18"
                                   ShadowDepth="0"
