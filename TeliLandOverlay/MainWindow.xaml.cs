@@ -11,6 +11,7 @@ public partial class MainWindow : Window
     private Point _mouseDownPoint;
     private bool _isPointerDown;
     private bool _isDragging;
+    private bool _wasMenuOpenOnPointerDown;
 
     public MainWindow()
     {
@@ -37,6 +38,7 @@ public partial class MainWindow : Window
         _mouseDownPoint = e.GetPosition(this);
         _isPointerDown = true;
         _isDragging = false;
+        _wasMenuOpenOnPointerDown = ActionMenuPopup.IsOpen;
         MainBadgeHost.CaptureMouse();
         e.Handled = true;
     }
@@ -72,11 +74,12 @@ public partial class MainWindow : Window
 
         if (_isPointerDown && !_isDragging)
         {
-            ActionMenuPopup.IsOpen = !ActionMenuPopup.IsOpen;
+            ActionMenuPopup.IsOpen = !_wasMenuOpenOnPointerDown;
         }
 
         _isPointerDown = false;
         _isDragging = false;
+        _wasMenuOpenOnPointerDown = false;
         e.Handled = true;
     }
 
