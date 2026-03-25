@@ -58,22 +58,41 @@
         <Popup x:Name="ActionMenuPopup"
                AllowsTransparency="True"
                PlacementTarget="{Binding ElementName=MainBadgeHost}"
-               Placement="Left"
-               StaysOpen="False"
+               Placement="Custom"
+               StaysOpen="True"
                PopupAnimation="Fade">
             <Border Background="Transparent" Padding="8">
-                <StackPanel>
-                    <Button Style="{StaticResource SecondaryCircleButtonStyle}"
-                            Content="START"
-                            ToolTip="Start" />
-                    <Button Style="{StaticResource SecondaryCircleButtonStyle}"
-                            Content="TOOLS"
-                            ToolTip="Tools" />
-                    <Button Style="{StaticResource SecondaryCircleButtonStyle}"
-                            Content="MENU"
-                            Margin="0"
-                            ToolTip="Menu" />
-                </StackPanel>
+                <Grid>
+                    <StackPanel x:Name="VerticalMenuPanel">
+                        <Button Style="{StaticResource SecondaryCircleButtonStyle}"
+                                Content="START"
+                                ToolTip="Start" />
+                        <Button Style="{StaticResource SecondaryCircleButtonStyle}"
+                                Content="TOOLS"
+                                ToolTip="Tools" />
+                        <Button Style="{StaticResource SecondaryCircleButtonStyle}"
+                                Content="MENU"
+                                Margin="0"
+                                ToolTip="Menu" />
+                    </StackPanel>
+
+                    <StackPanel x:Name="HorizontalMenuPanel"
+                                Orientation="Horizontal"
+                                Visibility="Collapsed">
+                        <Button Style="{StaticResource SecondaryCircleButtonStyle}"
+                                Content="START"
+                                Margin="0,0,10,0"
+                                ToolTip="Start" />
+                        <Button Style="{StaticResource SecondaryCircleButtonStyle}"
+                                Content="TOOLS"
+                                Margin="0,0,10,0"
+                                ToolTip="Tools" />
+                        <Button Style="{StaticResource SecondaryCircleButtonStyle}"
+                                Content="MENU"
+                                Margin="0"
+                                ToolTip="Menu" />
+                    </StackPanel>
+                </Grid>
             </Border>
         </Popup>
 
