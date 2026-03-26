@@ -1,0 +1,576 @@
+<Window x:Class="TeliLandOverlay.ToolbarWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="TeliLand Tools"
+        Width="220"
+        Height="68"
+        Background="Transparent"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        Topmost="True">
+    <Window.Resources>
+        <Style x:Key="ToolPrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="#2A2A2A" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ToolPrimaryButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True" />
+                                    <Condition Property="Background" Value="Transparent" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="ToolPrimaryButtonBorder" Property="Background" Value="#EEF4FB" />
+                                <Setter TargetName="ToolPrimaryButtonBorder" Property="BorderBrush" Value="#D8E3EF" />
+                            </MultiTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsPressed" Value="True" />
+                                    <Condition Property="Background" Value="Transparent" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="ToolPrimaryButtonBorder" Property="Background" Value="#E4EDF7" />
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ToolDropdownButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Margin" Value="2,0,0,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="#313131" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ToolDropdownButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True" />
+                                    <Condition Property="Background" Value="Transparent" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="ToolDropdownButtonBorder" Property="Background" Value="#EEF4FB" />
+                                <Setter TargetName="ToolDropdownButtonBorder" Property="BorderBrush" Value="#D8E3EF" />
+                            </MultiTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsPressed" Value="True" />
+                                    <Condition Property="Background" Value="Transparent" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="ToolDropdownButtonBorder" Property="Background" Value="#E4EDF7" />
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ToolMenuButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ToolMenuButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ToolMenuButtonBorder" Property="Background" Value="#2D2D2D" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CloseToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#D8DEE5" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="#5B6470" />
+            <Setter Property="FontFamily" Value="Bahnschrift SemiBold" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="CloseToolbarButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CloseToolbarButtonBorder" Property="Background" Value="#F1F5F9" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="CloseToolbarButtonBorder" Property="Background" Value="#E5EDF6" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MenuTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Bahnschrift SemiBold" />
+            <Setter Property="FontSize" Value="13.5" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="Transparent"
+          MouseLeftButtonDown="DragSurface_OnMouseLeftButtonDown"
+          MouseLeftButtonUp="DragSurface_OnMouseLeftButtonUp"
+          MouseMove="DragSurface_OnMouseMove">
+        <Border Margin="0,12,0,0"
+                CornerRadius="10"
+                Background="#FCFCFC"
+                BorderBrush="#D8DEE5"
+                BorderThickness="1"
+                Padding="8"
+                Cursor="SizeAll">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="14"
+                                  ShadowDepth="0"
+                                  Opacity="0.18"
+                                  Color="#000000" />
+            </Border.Effect>
+
+            <StackPanel Orientation="Horizontal"
+                        Margin="0,0,16,0">
+                <Grid Margin="0,0,8,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="36" />
+                        <ColumnDefinition Width="18" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="ShapeToolButton"
+                            Click="ShapeToolButton_OnClick"
+                            Style="{StaticResource ToolPrimaryButtonStyle}"
+                            ToolTip="Shape">
+                        <Grid>
+                            <Viewbox x:Name="ShapeRectangleIcon"
+                                     Width="15"
+                                     Height="15">
+                                <Rectangle Width="14"
+                                           Height="14"
+                                           RadiusX="2"
+                                           RadiusY="2"
+                                           Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                           StrokeThickness="1.8" />
+                            </Viewbox>
+                            <Viewbox x:Name="ShapeLineIcon"
+                                     Width="16"
+                                     Height="16"
+                                     Visibility="Collapsed">
+                                <Path Data="M 2 14 L 14 2"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.8"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" />
+                            </Viewbox>
+                            <Viewbox x:Name="ShapeArrowIcon"
+                                     Width="16"
+                                     Height="16"
+                                     Visibility="Collapsed">
+                                <Path Data="M 2 14 L 13 3 M 8 3 H 13 V 8"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.8"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round" />
+                            </Viewbox>
+                            <Viewbox x:Name="ShapeEllipseIcon"
+                                     Width="16"
+                                     Height="16"
+                                     Visibility="Collapsed">
+                                <Ellipse Width="14"
+                                         Height="14"
+                                         Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                         StrokeThickness="1.8" />
+                            </Viewbox>
+                            <Viewbox x:Name="ShapePolygonIcon"
+                                     Width="16"
+                                     Height="16"
+                                     Visibility="Collapsed">
+                                <Polygon Points="8,2 14,12 2,12"
+                                         Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                         StrokeThickness="1.6"
+                                         Fill="Transparent"
+                                         StrokeLineJoin="Round" />
+                            </Viewbox>
+                            <Viewbox x:Name="ShapeStarIcon"
+                                     Width="16"
+                                     Height="16"
+                                     Visibility="Collapsed">
+                                <Path Data="M 8 1.5 L 10 6 L 14.8 6.4 L 11.1 9.5 L 12.3 14.2 L 8 11.6 L 3.7 14.2 L 4.9 9.5 L 1.2 6.4 L 6 6 Z"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.4"
+                                      Fill="Transparent"
+                                      StrokeLineJoin="Round" />
+                            </Viewbox>
+                        </Grid>
+                    </Button>
+
+                    <Button x:Name="ShapeDropdownButton"
+                            Grid.Column="1"
+                            Click="ShapeDropdownButton_OnClick"
+                            Style="{StaticResource ToolDropdownButtonStyle}"
+                            ToolTip="Shape options">
+                        <Path Width="8"
+                              Height="5"
+                              Data="M 1 1 L 4 4 L 7 1"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="1.5"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" />
+                    </Button>
+                </Grid>
+
+                <Grid Margin="0,0,8,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="36" />
+                        <ColumnDefinition Width="18" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="PenToolButton"
+                            Click="PenToolButton_OnClick"
+                            Style="{StaticResource ToolPrimaryButtonStyle}"
+                            ToolTip="Pen">
+                        <Grid>
+                            <Viewbox x:Name="PenIcon"
+                                     Width="17"
+                                     Height="17">
+                                <Path Data="M 4 4 L 11 2 L 15 6 L 13 13 L 8 15 L 3 10 Z M 8 6 L 12 10"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.35"
+                                      StrokeLineJoin="Round"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" />
+                            </Viewbox>
+                            <Viewbox x:Name="PencilIcon"
+                                     Width="17"
+                                     Height="17"
+                                     Visibility="Collapsed">
+                                <Path Data="M 3 12 L 11.8 3.2 L 13.9 5.3 L 5.1 14.1 L 2.4 14.6 Z"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.35"
+                                      StrokeLineJoin="Round"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Fill="Transparent" />
+                            </Viewbox>
+                        </Grid>
+                    </Button>
+
+                    <Button x:Name="PenDropdownButton"
+                            Grid.Column="1"
+                            Click="PenDropdownButton_OnClick"
+                            Style="{StaticResource ToolDropdownButtonStyle}"
+                            ToolTip="Pen options">
+                        <Path Width="8"
+                              Height="5"
+                              Data="M 1 1 L 4 4 L 7 1"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="1.5"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round" />
+                    </Button>
+                </Grid>
+
+                <Button x:Name="TextToolButton"
+                        Click="TextToolButton_OnClick"
+                        Style="{StaticResource ToolPrimaryButtonStyle}"
+                        ToolTip="Text">
+                    <TextBlock Text="T"
+                               FontFamily="Bahnschrift SemiBold"
+                               FontSize="18"
+                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <Popup x:Name="ShapeMenuPopup"
+               AllowsTransparency="True"
+               Width="258"
+               Placement="Top"
+               PlacementTarget="{Binding ElementName=ShapeDropdownButton}"
+               HorizontalOffset="-126"
+               PopupAnimation="Fade"
+               StaysOpen="False">
+            <Border Background="#1F1F1F"
+                    CornerRadius="18"
+                    Padding="10">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="22"
+                                      ShadowDepth="0"
+                                      Opacity="0.28"
+                                      Color="#000000" />
+                </Border.Effect>
+
+                <StackPanel>
+                    <Button Tag="Rectangle"
+                            Click="ShapeMenuItem_OnClick"
+                            Style="{StaticResource ToolMenuButtonStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="RectangleSelectionMark"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Rectangle"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="2"
+                                       Text="R"
+                                       FontFamily="Bahnschrift SemiBold"
+                                       FontSize="13"
+                                       Foreground="#A9A9A9"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+
+                    <Button Tag="Line"
+                            Click="ShapeMenuItem_OnClick"
+                            Style="{StaticResource ToolMenuButtonStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LineSelectionMark"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Line"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="2"
+                                       Text="L"
+                                       FontFamily="Bahnschrift SemiBold"
+                                       FontSize="13"
+                                       Foreground="#A9A9A9"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+
+                    <Button Tag="Arrow"
+                            Click="ShapeMenuItem_OnClick"
+                            Style="{StaticResource ToolMenuButtonStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="ArrowSelectionMark"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Arrow"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="2"
+                                       Text="Shift+L"
+                                       FontFamily="Bahnschrift SemiBold"
+                                       FontSize="13"
+                                       Foreground="#A9A9A9"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+
+                    <Button Tag="Ellipse"
+                            Click="ShapeMenuItem_OnClick"
+                            Style="{StaticResource ToolMenuButtonStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="EllipseSelectionMark"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Ellipse"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="2"
+                                       Text="O"
+                                       FontFamily="Bahnschrift SemiBold"
+                                       FontSize="13"
+                                       Foreground="#A9A9A9"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+
+                    <Button Tag="Polygon"
+                            Click="ShapeMenuItem_OnClick"
+                            Style="{StaticResource ToolMenuButtonStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="PolygonSelectionMark"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Polygon"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="2"
+                                       FontFamily="Bahnschrift SemiBold"
+                                       FontSize="13"
+                                       Foreground="#A9A9A9"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+
+                    <Button Tag="Star"
+                            Click="ShapeMenuItem_OnClick"
+                            Style="{StaticResource ToolMenuButtonStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="StarSelectionMark"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Star"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="2"
+                                       FontFamily="Bahnschrift SemiBold"
+                                       FontSize="13"
+                                       Foreground="#A9A9A9"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <Popup x:Name="PenMenuPopup"
+               AllowsTransparency="True"
+               Width="172"
+               Placement="Top"
+               PlacementTarget="{Binding ElementName=PenDropdownButton}"
+               HorizontalOffset="-96"
+               PopupAnimation="Fade"
+               StaysOpen="False">
+            <Border Background="#1F1F1F"
+                    CornerRadius="18"
+                    Padding="10">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="22"
+                                      ShadowDepth="0"
+                                      Opacity="0.28"
+                                      Color="#000000" />
+                </Border.Effect>
+
+                <StackPanel>
+                    <Button Tag="Pen"
+                            Click="PenMenuItem_OnClick"
+                            Style="{StaticResource ToolMenuButtonStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="PenSelectionMark"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Pen"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="2"
+                                       Text="P"
+                                       FontFamily="Bahnschrift SemiBold"
+                                       FontSize="13"
+                                       Foreground="#A9A9A9"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+
+                    <Button Tag="Pencil"
+                            Click="PenMenuItem_OnClick"
+                            Style="{StaticResource ToolMenuButtonStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="PencilSelectionMark"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Pencil"
+                                       Style="{StaticResource MenuTextStyle}" />
+                            <TextBlock Grid.Column="2"
+                                       Text="Shift+P"
+                                       FontFamily="Bahnschrift SemiBold"
+                                       FontSize="13"
+                                       Foreground="#A9A9A9"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <Button Style="{StaticResource CloseToolbarButtonStyle}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,0,6,0"
+                Click="CloseToolbarButton_OnClick"
+                ToolTip="Close toolbar"
+                Content="X" />
+    </Grid>
+</Window>

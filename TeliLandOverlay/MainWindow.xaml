@@ -72,6 +72,7 @@
                                 ToolTip="Start" />
                         <Button Style="{StaticResource SecondaryCircleButtonStyle}"
                                 Content="TOOLS"
+                                Click="ToolsButton_OnClick"
                                 ToolTip="Tools" />
                         <Button Style="{StaticResource SecondaryCircleButtonStyle}"
                                 Content="MENU"
@@ -89,6 +90,7 @@
                         <Button Style="{StaticResource SecondaryCircleButtonStyle}"
                                 Content="TOOLS"
                                 Margin="0,0,10,0"
+                                Click="ToolsButton_OnClick"
                                 ToolTip="Tools" />
                         <Button Style="{StaticResource SecondaryCircleButtonStyle}"
                                 Content="MENU"

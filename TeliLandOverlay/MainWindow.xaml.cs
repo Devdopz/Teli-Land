@@ -31,6 +31,7 @@ public partial class MainWindow : Window
     private bool _isAdjustingBounds;
     private readonly DispatcherTimer _idleShrinkTimer = new();
     private DateTime _lastInteractionAtUtc = DateTime.UtcNow;
+    private ToolbarWindow? _toolbarWindow;
     private ActionMenuLayout _actionMenuLayout = ActionMenuLayout.Left;
 
     public MainWindow()
@@ -201,7 +202,28 @@ public partial class MainWindow : Window
 
     private void ExitOverlay_OnClick(object sender, RoutedEventArgs e)
     {
+        _toolbarWindow?.Close();
         Close();
+    }
+
+    private void ToolsButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        RecordInteraction();
+        ActionMenuPopup.IsOpen = false;
+
+        if (_toolbarWindow is { IsVisible: true })
+        {
+            _toolbarWindow.Hide();
+            return;
+        }
+
+        _toolbarWindow ??= new ToolbarWindow
+        {
+            Owner = this
+        };
+
+        _toolbarWindow.ShowAtBottomCenter();
+        _toolbarWindow.PositionWindow();
     }
 
     private void IdleShrinkTimer_OnTick(object? sender, EventArgs e)
