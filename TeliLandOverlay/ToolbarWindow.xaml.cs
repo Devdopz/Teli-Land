@@ -8,57 +8,47 @@ namespace TeliLandOverlay;
 
 public partial class ToolbarWindow : Window
 {
-    private enum ToolFamily
-    {
-        Shape,
-        Pen,
-        Text
-    }
-
-    private enum ShapeToolOption
-    {
-        Rectangle,
-        Line,
-        Arrow,
-        Ellipse,
-        Polygon,
-        Star
-    }
-
-    private enum PenToolOption
-    {
-        Pen,
-        Pencil
-    }
-
     private const double BottomMargin = 18;
     private const double EdgeSafeMargin = 5;
-
-    private static readonly SolidColorBrush ActivePrimaryBackgroundBrush = CreateBrush("#2A9CFF");
-    private static readonly SolidColorBrush ActiveDropdownBackgroundBrush = CreateBrush("#EAF4FF");
-    private static readonly SolidColorBrush ActiveDropdownBorderBrush = CreateBrush("#D3E7FF");
-    private static readonly SolidColorBrush ActiveDropdownForegroundBrush = CreateBrush("#237EE3");
-    private static readonly SolidColorBrush DefaultPrimaryForegroundBrush = CreateBrush("#2A2A2A");
-    private static readonly SolidColorBrush DefaultDropdownForegroundBrush = CreateBrush("#313131");
+    private static readonly SolidColorBrush ActiveToolBackgroundBrush = CreateBrush("#2A9CFF");
+    private static readonly SolidColorBrush ActiveToolBorderBrush = CreateBrush("#2A9CFF");
+    private static readonly SolidColorBrush ActiveToolForegroundBrush = Brushes.White;
+    private static readonly SolidColorBrush InactiveToolBackgroundBrush = Brushes.Transparent;
+    private static readonly SolidColorBrush InactiveToolBorderBrush = Brushes.Transparent;
+    private static readonly SolidColorBrush InactiveToolForegroundBrush = CreateBrush("#2A2A2A");
+    private static readonly SolidColorBrush UtilityButtonBorderBrush = CreateBrush("#D8E3EF");
+    private static readonly SolidColorBrush UtilityButtonHoverBackgroundBrush = CreateBrush("#EEF4FB");
+    private static readonly SolidColorBrush SelectedColorBorderBrush = CreateBrush("#FFFFFF");
+    private static readonly SolidColorBrush DefaultColorBorderBrush = CreateBrush("#00000000");
 
     private Point _dragStartScreenPoint;
     private double _dragStartLeft;
     private bool _isDragging;
     private bool _hasCustomHorizontalPosition;
-    private ToolFamily _activeToolFamily = ToolFamily.Shape;
-    private ShapeToolOption _selectedShapeTool = ShapeToolOption.Rectangle;
-    private PenToolOption _selectedPenTool = PenToolOption.Pen;
+    private bool _isPencilEnabled;
+    private Color _selectedPencilColor = (Color)ColorConverter.ConvertFromString("#1D2733")!;
+    private double _selectedPencilThickness = 3;
+
+    public event Action<DrawingToolKind>? SelectedToolChanged;
+    public event Action<Color, double>? PencilSettingsChanged;
+    public event Action<bool>? HoverStateChanged;
+    public event Action? ToolbarHidden;
+
+    public DrawingToolKind SelectedToolKind => _isPencilEnabled ? DrawingToolKind.Pencil : DrawingToolKind.None;
 
     public ToolbarWindow()
     {
         InitializeComponent();
         Loaded += ToolbarWindow_OnLoaded;
-        UpdateToolbarVisuals();
+        ApplyPencilVisualState();
+        ApplyColorVisualState();
+        ApplySizeVisualState();
     }
 
     public void ShowAtBottomCenter()
     {
         CloseToolMenus();
+        SetPencilEnabled(true, notifySelectionChanged: false);
 
         if (!IsLoaded)
         {
@@ -72,6 +62,28 @@ public partial class ToolbarWindow : Window
         {
             Show();
         }
+
+        NotifySelectedToolChanged();
+        NotifyPencilSettingsChanged();
+    }
+
+    public void HideToolbar()
+    {
+        if (!IsVisible)
+        {
+            return;
+        }
+
+        CloseToolMenus();
+        SetPencilEnabled(false, notifySelectionChanged: false);
+        Hide();
+        ToolbarHidden?.Invoke();
+    }
+
+    public void BringToFront()
+    {
+        Topmost = false;
+        Topmost = true;
     }
 
     public void PositionWindow()
@@ -89,9 +101,58 @@ public partial class ToolbarWindow : Window
         Top = Math.Max(workArea.Top + EdgeSafeMargin, workArea.Bottom - windowHeight - BottomMargin);
     }
 
+    public void TogglePencilMode()
+    {
+        SetPencilEnabled(!_isPencilEnabled, notifySelectionChanged: true);
+    }
+
+    public void EnablePencil()
+    {
+        SetPencilEnabled(true, notifySelectionChanged: true);
+    }
+
     private void ToolbarWindow_OnLoaded(object sender, RoutedEventArgs e)
     {
         PositionWindow();
+        ApplyColorVisualState();
+        ApplySizeVisualState();
+        NotifySelectedToolChanged();
+        NotifyPencilSettingsChanged();
+    }
+
+    private void DragSurface_OnMouseEnter(object sender, MouseEventArgs e)
+    {
+        HoverStateChanged?.Invoke(true);
+    }
+
+    private void DragSurface_OnMouseLeave(object sender, MouseEventArgs e)
+    {
+        if (ColorMenuPopup.IsOpen || SizeMenuPopup.IsOpen)
+        {
+            return;
+        }
+
+        HoverStateChanged?.Invoke(false);
+    }
+
+    private void PopupSurface_OnMouseEnter(object sender, MouseEventArgs e)
+    {
+        HoverStateChanged?.Invoke(true);
+    }
+
+    private void PopupSurface_OnMouseLeave(object sender, MouseEventArgs e)
+    {
+        HoverStateChanged?.Invoke(false);
+    }
+
+    private void ToolPopup_OnClosed(object sender, EventArgs e)
+    {
+        ApplyPencilVisualState();
+
+        if (!IsMouseOver)
+        {
+            HoverStateChanged?.Invoke(false);
+        }
     }
 
     private void DragSurface_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -137,147 +198,144 @@ public partial class ToolbarWindow : Window
         e.Handled = true;
     }
 
-    private void ShapeToolButton_OnClick(object sender, RoutedEventArgs e)
+    private void PencilToolButton_OnClick(object sender, RoutedEventArgs e)
     {
-        _activeToolFamily = ToolFamily.Shape;
-        CloseToolMenus();
-        UpdateToolbarVisuals();
+        SetPencilEnabled(true, notifySelectionChanged: true);
     }
 
-    private void PenToolButton_OnClick(object sender, RoutedEventArgs e)
+    private void ColorPickerButton_OnClick(object sender, RoutedEventArgs e)
     {
-        _activeToolFamily = ToolFamily.Pen;
-        CloseToolMenus();
-        UpdateToolbarVisuals();
+        TogglePopup(ColorMenuPopup, SizeMenuPopup);
     }
 
-    private void TextToolButton_OnClick(object sender, RoutedEventArgs e)
+    private void SizePickerButton_OnClick(object sender, RoutedEventArgs e)
     {
-        _activeToolFamily = ToolFamily.Text;
-        CloseToolMenus();
-        UpdateToolbarVisuals();
+        TogglePopup(SizeMenuPopup, ColorMenuPopup);
     }
 
-    private void ShapeDropdownButton_OnClick(object sender, RoutedEventArgs e)
+    private void ColorOptionButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TogglePopup(ShapeMenuPopup, PenMenuPopup);
-    }
-
-    private void PenDropdownButton_OnClick(object sender, RoutedEventArgs e)
-    {
-        TogglePopup(PenMenuPopup, ShapeMenuPopup);
-    }
-
-    private void ShapeMenuItem_OnClick(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: string tag } || !Enum.TryParse(tag, out ShapeToolOption tool))
+        if (sender is not Button { Tag: string colorHex })
         {
             return;
         }
 
-        _selectedShapeTool = tool;
-        _activeToolFamily = ToolFamily.Shape;
-        ShapeMenuPopup.IsOpen = false;
-        UpdateToolbarVisuals();
+        _selectedPencilColor = (Color)ColorConverter.ConvertFromString(colorHex)!;
+        ApplyColorVisualState();
+        ColorMenuPopup.IsOpen = false;
+        NotifyPencilSettingsChanged();
     }
 
-    private void PenMenuItem_OnClick(object sender, RoutedEventArgs e)
+    private void SizeSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (sender is not Button { Tag: string tag } || !Enum.TryParse(tag, out PenToolOption tool))
-        {
-            return;
-        }
+        _selectedPencilThickness = Math.Round(e.NewValue, 1);
+        ApplySizeVisualState();
 
-        _selectedPenTool = tool;
-        _activeToolFamily = ToolFamily.Pen;
-        PenMenuPopup.IsOpen = false;
-        UpdateToolbarVisuals();
+        if (IsLoaded)
+        {
+            NotifyPencilSettingsChanged();
+        }
     }
 
     private void CloseToolbarButton_OnClick(object sender, RoutedEventArgs e)
     {
-        CloseToolMenus();
-        Hide();
+        HideToolbar();
     }
 
-    private void UpdateToolbarVisuals()
+    private void NotifySelectedToolChanged()
     {
-        UpdateShapeIcon();
-        UpdatePenIcon();
-        UpdateButtonStates();
-        UpdateSelectionMarks();
+        SelectedToolChanged?.Invoke(SelectedToolKind);
     }
 
-    private void UpdateShapeIcon()
+    private void NotifyPencilSettingsChanged()
     {
-        ShapeRectangleIcon.Visibility = _selectedShapeTool == ShapeToolOption.Rectangle ? Visibility.Visible : Visibility.Collapsed;
-        ShapeLineIcon.Visibility = _selectedShapeTool == ShapeToolOption.Line ? Visibility.Visible : Visibility.Collapsed;
-        ShapeArrowIcon.Visibility = _selectedShapeTool == ShapeToolOption.Arrow ? Visibility.Visible : Visibility.Collapsed;
-        ShapeEllipseIcon.Visibility = _selectedShapeTool == ShapeToolOption.Ellipse ? Visibility.Visible : Visibility.Collapsed;
-        ShapePolygonIcon.Visibility = _selectedShapeTool == ShapeToolOption.Polygon ? Visibility.Visible : Visibility.Collapsed;
-        ShapeStarIcon.Visibility = _selectedShapeTool == ShapeToolOption.Star ? Visibility.Visible : Visibility.Collapsed;
+        PencilSettingsChanged?.Invoke(_selectedPencilColor, _selectedPencilThickness);
     }
 
-    private void UpdatePenIcon()
+    private void SetPencilEnabled(bool isEnabled, bool notifySelectionChanged)
     {
-        PenIcon.Visibility = _selectedPenTool == PenToolOption.Pen ? Visibility.Visible : Visibility.Collapsed;
-        PencilIcon.Visibility = _selectedPenTool == PenToolOption.Pencil ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    private void UpdateButtonStates()
-    {
-        ApplyToolFamilyState(ShapeToolButton, ShapeDropdownButton, _activeToolFamily == ToolFamily.Shape);
-        ApplyToolFamilyState(PenToolButton, PenDropdownButton, _activeToolFamily == ToolFamily.Pen);
-        ApplyToolFamilyState(TextToolButton, null, _activeToolFamily == ToolFamily.Text);
-    }
-
-    private static void ApplyToolFamilyState(Button primaryButton, Button? dropdownButton, bool isActive)
-    {
-        primaryButton.Background = isActive ? ActivePrimaryBackgroundBrush : Brushes.Transparent;
-        primaryButton.BorderBrush = isActive ? ActivePrimaryBackgroundBrush : Brushes.Transparent;
-        primaryButton.Foreground = isActive ? Brushes.White : DefaultPrimaryForegroundBrush;
-
-        if (dropdownButton is null)
+        if (_isPencilEnabled == isEnabled)
         {
+            if (notifySelectionChanged)
+            {
+                NotifySelectedToolChanged();
+            }
+
             return;
         }
 
-        dropdownButton.Background = isActive ? ActiveDropdownBackgroundBrush : Brushes.Transparent;
-        dropdownButton.BorderBrush = isActive ? ActiveDropdownBorderBrush : Brushes.Transparent;
-        dropdownButton.Foreground = isActive ? ActiveDropdownForegroundBrush : DefaultDropdownForegroundBrush;
+        _isPencilEnabled = isEnabled;
+        ApplyPencilVisualState();
+
+        if (notifySelectionChanged)
+        {
+            NotifySelectedToolChanged();
+        }
     }
 
-    private void UpdateSelectionMarks()
+    private void ApplyPencilVisualState()
     {
-        RectangleSelectionMark.Text = _selectedShapeTool == ShapeToolOption.Rectangle ? "✓" : string.Empty;
-        LineSelectionMark.Text = _selectedShapeTool == ShapeToolOption.Line ? "✓" : string.Empty;
-        ArrowSelectionMark.Text = _selectedShapeTool == ShapeToolOption.Arrow ? "✓" : string.Empty;
-        EllipseSelectionMark.Text = _selectedShapeTool == ShapeToolOption.Ellipse ? "✓" : string.Empty;
-        PolygonSelectionMark.Text = _selectedShapeTool == ShapeToolOption.Polygon ? "✓" : string.Empty;
-        StarSelectionMark.Text = _selectedShapeTool == ShapeToolOption.Star ? "✓" : string.Empty;
-
-        PenSelectionMark.Text = _selectedPenTool == PenToolOption.Pen ? "✓" : string.Empty;
-        PencilSelectionMark.Text = _selectedPenTool == PenToolOption.Pencil ? "✓" : string.Empty;
+        PencilToolButton.Background = _isPencilEnabled ? ActiveToolBackgroundBrush : InactiveToolBackgroundBrush;
+        PencilToolButton.BorderBrush = _isPencilEnabled ? ActiveToolBorderBrush : InactiveToolBorderBrush;
+        PencilToolButton.Foreground = _isPencilEnabled ? ActiveToolForegroundBrush : InactiveToolForegroundBrush;
+        ColorPickerButton.BorderBrush = ColorMenuPopup.IsOpen ? UtilityButtonBorderBrush : InactiveToolBorderBrush;
+        ColorPickerButton.Background = ColorMenuPopup.IsOpen ? UtilityButtonHoverBackgroundBrush : InactiveToolBackgroundBrush;
+        SizePickerButton.BorderBrush = SizeMenuPopup.IsOpen ? UtilityButtonBorderBrush : InactiveToolBorderBrush;
+        SizePickerButton.Background = SizeMenuPopup.IsOpen ? UtilityButtonHoverBackgroundBrush : InactiveToolBackgroundBrush;
     }
 
-    private static void TogglePopup(Popup targetPopup, Popup otherPopup)
+    private void ApplyColorVisualState()
+    {
+        CurrentColorSwatch.Background = new SolidColorBrush(_selectedPencilColor);
+        var selectedColorHex = ToRgbHex(_selectedPencilColor);
+
+        foreach (var child in ColorPalettePanel.Children)
+        {
+            if (child is not Button { Tag: string colorHex, Content: Border colorBorder })
+            {
+                continue;
+            }
+
+            var isSelected = string.Equals(colorHex, selectedColorHex, StringComparison.OrdinalIgnoreCase);
+            colorBorder.BorderThickness = isSelected ? new Thickness(2) : new Thickness(0);
+            colorBorder.BorderBrush = isSelected ? SelectedColorBorderBrush : DefaultColorBorderBrush;
+        }
+    }
+
+    private void ApplySizeVisualState()
+    {
+        SizeValueText.Text = $"{Math.Round(_selectedPencilThickness, 1):0.#} px";
+        SizePreviewLine.Height = _selectedPencilThickness;
+        SizePreviewLine.RadiusX = _selectedPencilThickness / 2;
+        SizePreviewLine.RadiusY = _selectedPencilThickness / 2;
+
+        if (Math.Abs(SizeSlider.Value - _selectedPencilThickness) > 0.01)
+        {
+            SizeSlider.Value = _selectedPencilThickness;
+        }
+    }
+
+    private void TogglePopup(Popup targetPopup, Popup otherPopup)
     {
         var shouldOpen = !targetPopup.IsOpen;
         otherPopup.IsOpen = false;
         targetPopup.IsOpen = shouldOpen;
+        ApplyPencilVisualState();
+        HoverStateChanged?.Invoke(shouldOpen || IsMouseOver);
     }
 
     private void CloseToolMenus()
     {
-        ShapeMenuPopup.IsOpen = false;
-        PenMenuPopup.IsOpen = false;
+        ColorMenuPopup.IsOpen = false;
+        SizeMenuPopup.IsOpen = false;
+        ApplyPencilVisualState();
     }
 
     private static bool IsInteractiveElement(DependencyObject? current)
     {
         while (current is not null)
         {
-            if (current is Button)
+            if (current is ButtonBase or Slider or Thumb)
             {
                 return true;
             }
@@ -293,5 +351,10 @@ public partial class ToolbarWindow : Window
         var brush = (SolidColorBrush)new BrushConverter().ConvertFromString(hex)!;
         brush.Freeze();
         return brush;
+    }
+
+    private static string ToRgbHex(Color color)
+    {
+        return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
     }
 }
