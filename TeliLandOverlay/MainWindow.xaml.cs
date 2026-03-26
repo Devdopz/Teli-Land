@@ -6,6 +6,10 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using WpfColor = System.Windows.Media.Color;
+using WpfMouseEventArgs = System.Windows.Input.MouseEventArgs;
+using WpfPoint = System.Windows.Point;
+using WpfSize = System.Windows.Size;
 
 namespace TeliLandOverlay;
 
@@ -36,7 +40,7 @@ public partial class MainWindow : Window
     private static readonly TimeSpan IdleShrinkDelay = TimeSpan.FromSeconds(5);
     private static readonly IntPtr HwndTopmost = new(-1);
 
-    private Point _mouseDownPoint;
+    private WpfPoint _mouseDownPoint;
     private bool _isPointerDown;
     private bool _isDragging;
     private bool _wasMenuOpenOnPointerDown;
@@ -46,6 +50,7 @@ public partial class MainWindow : Window
     private DateTime _lastInteractionAtUtc = DateTime.UtcNow;
     private ToolbarWindow? _toolbarWindow;
     private DrawingOverlayWindow? _drawingOverlayWindow;
+    private ScreenShareHubWindow? _screenShareHubWindow;
     private ActionMenuLayout _actionMenuLayout = ActionMenuLayout.Left;
     private HwndSource? _windowSource;
     private bool _isPencilToggleHotKeyRegistered;
@@ -116,28 +121,28 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MainBadge_OnMouseEnter(object sender, MouseEventArgs e)
+    private void MainBadge_OnMouseEnter(object sender, WpfMouseEventArgs e)
     {
         _isHoveringMainUi = true;
         RecordInteraction();
         RefreshDrawingOverlayInteraction();
     }
 
-    private void MainBadge_OnMouseLeave(object sender, MouseEventArgs e)
+    private void MainBadge_OnMouseLeave(object sender, WpfMouseEventArgs e)
     {
         _isHoveringMainUi = false;
         RecordInteraction(expandBadge: false);
         RefreshDrawingOverlayInteraction();
     }
 
-    private void ActionMenu_OnMouseEnter(object sender, MouseEventArgs e)
+    private void ActionMenu_OnMouseEnter(object sender, WpfMouseEventArgs e)
     {
         _isHoveringMainUi = true;
         RecordInteraction();
         RefreshDrawingOverlayInteraction();
     }
 
-    private void ActionMenu_OnMouseLeave(object sender, MouseEventArgs e)
+    private void ActionMenu_OnMouseLeave(object sender, WpfMouseEventArgs e)
     {
         _isHoveringMainUi = false;
         RecordInteraction(expandBadge: false);
@@ -155,7 +160,7 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
-    private void MainBadge_OnMouseMove(object sender, MouseEventArgs e)
+    private void MainBadge_OnMouseMove(object sender, WpfMouseEventArgs e)
     {
         if (!_isPointerDown || e.LeftButton != MouseButtonState.Pressed)
         {
@@ -258,9 +263,29 @@ public partial class MainWindow : Window
 
     private void ExitOverlay_OnClick(object sender, RoutedEventArgs e)
     {
+        _screenShareHubWindow?.Close();
         _toolbarWindow?.Close();
         _drawingOverlayWindow?.Close();
         Close();
+    }
+
+    private void StartSessionButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        RecordInteraction();
+        ActionMenuPopup.IsOpen = false;
+
+        if (_screenShareHubWindow is null)
+        {
+            _screenShareHubWindow = new ScreenShareHubWindow();
+            _screenShareHubWindow.Closed += (_, _) => _screenShareHubWindow = null;
+        }
+
+        if (!_screenShareHubWindow.IsVisible)
+        {
+            _screenShareHubWindow.Show();
+        }
+
+        _screenShareHubWindow.Activate();
     }
 
     private void ToolsButton_OnClick(object sender, RoutedEventArgs e)
@@ -338,9 +363,9 @@ public partial class MainWindow : Window
     }
 
     private CustomPopupPlacement[] ActionMenuPopup_OnCustomPopupPlacement(
-        Size popupSize,
-        Size targetSize,
-        Point offset)
+        WpfSize popupSize,
+        WpfSize targetSize,
+        WpfPoint offset)
     {
         var horizontalOffset = _actionMenuLayout switch
         {
@@ -358,7 +383,7 @@ public partial class MainWindow : Window
 
         return
         [
-            new CustomPopupPlacement(new Point(horizontalOffset, verticalOffset), PopupPrimaryAxis.None)
+            new CustomPopupPlacement(new WpfPoint(horizontalOffset, verticalOffset), PopupPrimaryAxis.None)
         ];
     }
 
@@ -393,7 +418,7 @@ public partial class MainWindow : Window
         EnforceOverlayWindowsOnTop();
     }
 
-    private void ToolbarWindow_OnPencilSettingsChanged(Color color, double thickness)
+    private void ToolbarWindow_OnPencilSettingsChanged(WpfColor color, double thickness)
     {
         var drawingOverlayWindow = GetOrCreateDrawingOverlayWindow();
         drawingOverlayWindow.SetPencilStyle(color, thickness);

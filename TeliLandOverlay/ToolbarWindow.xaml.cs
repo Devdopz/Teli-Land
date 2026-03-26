@@ -3,6 +3,13 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using WpfBrushes = System.Windows.Media.Brushes;
+using WpfButton = System.Windows.Controls.Button;
+using WpfButtonBase = System.Windows.Controls.Primitives.ButtonBase;
+using WpfColor = System.Windows.Media.Color;
+using WpfColorConverter = System.Windows.Media.ColorConverter;
+using WpfMouseEventArgs = System.Windows.Input.MouseEventArgs;
+using WpfPoint = System.Windows.Point;
 
 namespace TeliLandOverlay;
 
@@ -12,25 +19,25 @@ public partial class ToolbarWindow : Window
     private const double EdgeSafeMargin = 5;
     private static readonly SolidColorBrush ActiveToolBackgroundBrush = CreateBrush("#2A9CFF");
     private static readonly SolidColorBrush ActiveToolBorderBrush = CreateBrush("#2A9CFF");
-    private static readonly SolidColorBrush ActiveToolForegroundBrush = Brushes.White;
-    private static readonly SolidColorBrush InactiveToolBackgroundBrush = Brushes.Transparent;
-    private static readonly SolidColorBrush InactiveToolBorderBrush = Brushes.Transparent;
+    private static readonly SolidColorBrush ActiveToolForegroundBrush = WpfBrushes.White;
+    private static readonly SolidColorBrush InactiveToolBackgroundBrush = WpfBrushes.Transparent;
+    private static readonly SolidColorBrush InactiveToolBorderBrush = WpfBrushes.Transparent;
     private static readonly SolidColorBrush InactiveToolForegroundBrush = CreateBrush("#2A2A2A");
     private static readonly SolidColorBrush UtilityButtonBorderBrush = CreateBrush("#D8E3EF");
     private static readonly SolidColorBrush UtilityButtonHoverBackgroundBrush = CreateBrush("#EEF4FB");
     private static readonly SolidColorBrush SelectedColorBorderBrush = CreateBrush("#FFFFFF");
     private static readonly SolidColorBrush DefaultColorBorderBrush = CreateBrush("#00000000");
 
-    private Point _dragStartScreenPoint;
+    private WpfPoint _dragStartScreenPoint;
     private double _dragStartLeft;
     private bool _isDragging;
     private bool _hasCustomHorizontalPosition;
     private bool _isPencilEnabled;
-    private Color _selectedPencilColor = (Color)ColorConverter.ConvertFromString("#1D2733")!;
+    private WpfColor _selectedPencilColor = (WpfColor)WpfColorConverter.ConvertFromString("#1D2733")!;
     private double _selectedPencilThickness = 3;
 
     public event Action<DrawingToolKind>? SelectedToolChanged;
-    public event Action<Color, double>? PencilSettingsChanged;
+    public event Action<WpfColor, double>? PencilSettingsChanged;
     public event Action<bool>? HoverStateChanged;
     public event Action? ToolbarHidden;
 
@@ -120,12 +127,12 @@ public partial class ToolbarWindow : Window
         NotifyPencilSettingsChanged();
     }
 
-    private void DragSurface_OnMouseEnter(object sender, MouseEventArgs e)
+    private void DragSurface_OnMouseEnter(object sender, WpfMouseEventArgs e)
     {
         HoverStateChanged?.Invoke(true);
     }
 
-    private void DragSurface_OnMouseLeave(object sender, MouseEventArgs e)
+    private void DragSurface_OnMouseLeave(object sender, WpfMouseEventArgs e)
     {
         if (ColorMenuPopup.IsOpen || SizeMenuPopup.IsOpen)
         {
@@ -135,12 +142,12 @@ public partial class ToolbarWindow : Window
         HoverStateChanged?.Invoke(false);
     }
 
-    private void PopupSurface_OnMouseEnter(object sender, MouseEventArgs e)
+    private void PopupSurface_OnMouseEnter(object sender, WpfMouseEventArgs e)
     {
         HoverStateChanged?.Invoke(true);
     }
 
-    private void PopupSurface_OnMouseLeave(object sender, MouseEventArgs e)
+    private void PopupSurface_OnMouseLeave(object sender, WpfMouseEventArgs e)
     {
         HoverStateChanged?.Invoke(false);
     }
@@ -170,7 +177,7 @@ public partial class ToolbarWindow : Window
         e.Handled = true;
     }
 
-    private void DragSurface_OnMouseMove(object sender, MouseEventArgs e)
+    private void DragSurface_OnMouseMove(object sender, WpfMouseEventArgs e)
     {
         if (!_isDragging || e.LeftButton != MouseButtonState.Pressed)
         {
@@ -215,12 +222,12 @@ public partial class ToolbarWindow : Window
 
     private void ColorOptionButton_OnClick(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button { Tag: string colorHex })
+        if (sender is not WpfButton { Tag: string colorHex })
         {
             return;
         }
 
-        _selectedPencilColor = (Color)ColorConverter.ConvertFromString(colorHex)!;
+        _selectedPencilColor = (WpfColor)WpfColorConverter.ConvertFromString(colorHex)!;
         ApplyColorVisualState();
         ColorMenuPopup.IsOpen = false;
         NotifyPencilSettingsChanged();
@@ -291,7 +298,7 @@ public partial class ToolbarWindow : Window
 
         foreach (var child in ColorPalettePanel.Children)
         {
-            if (child is not Button { Tag: string colorHex, Content: Border colorBorder })
+            if (child is not WpfButton { Tag: string colorHex, Content: Border colorBorder })
             {
                 continue;
             }
@@ -335,7 +342,7 @@ public partial class ToolbarWindow : Window
     {
         while (current is not null)
         {
-            if (current is ButtonBase or Slider or Thumb)
+            if (current is WpfButtonBase or Slider or Thumb)
             {
                 return true;
             }
@@ -353,7 +360,7 @@ public partial class ToolbarWindow : Window
         return brush;
     }
 
-    private static string ToRgbHex(Color color)
+    private static string ToRgbHex(WpfColor color)
     {
         return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
     }

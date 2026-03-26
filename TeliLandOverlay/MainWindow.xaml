@@ -69,6 +69,7 @@
                     <StackPanel x:Name="VerticalMenuPanel">
                         <Button Style="{StaticResource SecondaryCircleButtonStyle}"
                                 Content="START"
+                                Click="StartSessionButton_OnClick"
                                 ToolTip="Start" />
                         <Button Style="{StaticResource SecondaryCircleButtonStyle}"
                                 Content="TOOLS"
@@ -86,6 +87,7 @@
                         <Button Style="{StaticResource SecondaryCircleButtonStyle}"
                                 Content="START"
                                 Margin="0,0,10,0"
+                                Click="StartSessionButton_OnClick"
                                 ToolTip="Start" />
                         <Button Style="{StaticResource SecondaryCircleButtonStyle}"
                                 Content="TOOLS"

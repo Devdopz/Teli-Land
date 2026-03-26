@@ -6,6 +6,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Collections.Generic;
+using WpfColorConverter = System.Windows.Media.ColorConverter;
+using WpfColor = System.Windows.Media.Color;
+using WpfCursors = System.Windows.Input.Cursors;
+using WpfMouseEventArgs = System.Windows.Input.MouseEventArgs;
 
 namespace TeliLandOverlay;
 
@@ -19,7 +23,7 @@ public partial class DrawingOverlayWindow : Window
     private DrawingToolKind _activeTool = DrawingToolKind.None;
     private bool _isDrawing;
     private Polyline? _activeStroke;
-    private Color _pencilColor = (Color)ColorConverter.ConvertFromString("#1D2733")!;
+    private WpfColor _pencilColor = (WpfColor)WpfColorConverter.ConvertFromString("#1D2733")!;
     private double _pencilThickness = 3;
     private readonly Stack<UIElement> _redoStrokes = new();
     private IntPtr _windowHandle;
@@ -37,10 +41,10 @@ public partial class DrawingOverlayWindow : Window
     public void SetTool(DrawingToolKind toolKind)
     {
         _activeTool = toolKind;
-        InteractionSurface.Cursor = toolKind == DrawingToolKind.Pencil ? Cursors.Pen : Cursors.Arrow;
+        InteractionSurface.Cursor = toolKind == DrawingToolKind.Pencil ? WpfCursors.Pen : WpfCursors.Arrow;
     }
 
-    public void SetPencilStyle(Color color, double thickness)
+    public void SetPencilStyle(WpfColor color, double thickness)
     {
         _pencilColor = color;
         _pencilThickness = Math.Clamp(thickness, 1.5, 12);
@@ -98,7 +102,7 @@ public partial class DrawingOverlayWindow : Window
         CancelActiveStroke();
         InteractionSurface.Background = isEnabled ? InteractionCaptureBrush : null;
         InteractionSurface.IsHitTestVisible = isEnabled;
-        InteractionSurface.Cursor = isEnabled ? Cursors.Pen : Cursors.Arrow;
+        InteractionSurface.Cursor = isEnabled ? WpfCursors.Pen : WpfCursors.Arrow;
         SetClickThroughEnabled(!isEnabled);
 
         if (isEnabled)
@@ -165,7 +169,7 @@ public partial class DrawingOverlayWindow : Window
         e.Handled = true;
     }
 
-    private void InteractionSurface_OnMouseMove(object sender, MouseEventArgs e)
+    private void InteractionSurface_OnMouseMove(object sender, WpfMouseEventArgs e)
     {
         if (!_isDrawing || _activeStroke is null || e.LeftButton != MouseButtonState.Pressed)
         {
@@ -273,7 +277,7 @@ public partial class DrawingOverlayWindow : Window
         return brush;
     }
 
-    private static SolidColorBrush CreateBrush(Color color)
+    private static SolidColorBrush CreateBrush(WpfColor color)
     {
         var brush = new SolidColorBrush(color);
         brush.Freeze();
