@@ -61,7 +61,10 @@
                Placement="Custom"
                StaysOpen="True"
                PopupAnimation="Fade">
-            <Border Background="Transparent" Padding="8">
+            <Border Background="Transparent"
+                    Padding="8"
+                    MouseEnter="ActionMenu_OnMouseEnter"
+                    MouseLeave="ActionMenu_OnMouseLeave">
                 <Grid>
                     <StackPanel x:Name="VerticalMenuPanel">
                         <Button Style="{StaticResource SecondaryCircleButtonStyle}"
@@ -106,10 +109,18 @@
                 BorderThickness="1"
                 CornerRadius="41"
                 Cursor="Hand"
+                RenderTransformOrigin="0.5,0.5"
+                MouseEnter="MainBadge_OnMouseEnter"
+                MouseLeave="MainBadge_OnMouseLeave"
                 MouseLeftButtonDown="MainBadge_OnMouseLeftButtonDown"
                 MouseMove="MainBadge_OnMouseMove"
                 MouseLeftButtonUp="MainBadge_OnMouseLeftButtonUp"
                 ToolTip="Click to toggle menu. Drag to move. Right-click to exit.">
+            <Border.RenderTransform>
+                <ScaleTransform x:Name="MainBadgeScaleTransform"
+                                ScaleX="1"
+                                ScaleY="1" />
+            </Border.RenderTransform>
             <Border.Effect>
                 <DropShadowEffect BlurRadius="18"
                                   ShadowDepth="0"
